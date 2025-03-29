@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 700px;
+            margin: 0 auto;
+        }
+
+        th, td {
+            text-align: center;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: #ffffff;
+        }
+
+        tr:nth-child(even) {
+            background-color: #b4b4b4;
+        }
+
+        tr:nth-child(odd) {
+            background-color: #ffffff;
+        }
+
+        input {
+            width: 200px;
+
+        }
+
+        select {
+            width: 200px;
+        }
+    </style>
+    <script src="{{ url_for('static', filename='jquery-3.6.0.min.js') }}"></script>
+    <script type="text/javascript">
+        $(function () {
+            // 页面加载完成后执行
+            // 发送ajax请求获取角色列表并填充到下拉框中
+            // 注意：这里需要使用jQuery的ajax方法，因为后端返回的是json格式的数据
+            $.ajax({
+                dataType: "json",
+                contentType: "application/json",
+                {#data: JSON.stringify({"id": ids}),  #}
+                url: "/role/list",
+                method: "POST",
+                success: function (data) {
+                    if (data.code === 0) {
+                        var role_select = $("#role");
+                        var htmls = '<option value="">请选择</option>';
+                        for (var i = 0; i < data.data.length; i++) {
+                            htmls += "<option value='" + data.data[i].id + "'>" + data.data[i].name + "</option>";
+                        }
+                        role_select.html(htmls)
+                        var role_id = "{{  data.data.role_id }}";
+                        if (role_id != null)
+                            role_select.val({{  data.data.role_id }});
+                        {#role_select.val(3);#}
+                    } else alert("获取角色列表失败");
+                },
+                error: function () {
+                    alert("获取角色列表失败");
+                }
+            })
+            var sex = "{{  data.data.sex }}";
+            if (sex != null) {
+                $("#sex").val({{  data.data.sex }});
+            }
+        })
+
+        // 定义一个名为save()的函数，用于保存用户信息
+        function save() {
+            // 获取输入框中的值
+            var name = $("#name").val();
+            var age = $("#age").val();
+            var sex = $("#sex").val();
+            var role = $("#role").val();
+            // 检查必填信息是否为空
+            if (name === "" || age === "" || role === "") {
+                // 提示填写完整信息
+                alert("请填写完整信息");
+                return;
+            }
+            // 发起 AJAX 请求将用户信息保存到服务器
+            $.ajax({
+                // 指定返回数据类型为 JSON
+                dataType: "json",
+                // 指定请求内容类型为 JSON
+                contentType: "application/json",
+                // 将用户信息转换成 JSON 格式发送到服务器
+                data: JSON.stringify({"name": name, "age": age, "sex": sex, "role_id": role}),
+                // 指定服务器端保存用户信息的接口地址
+                url: "/save_user",
+                // 指定请求方法为 POST
+                method: "POST",
+                success: function (data) {
+                    // 根据返回的数据判断保存是否成功并进行相应提示
+                    if (data.code === 0) {
+                        alert("保存成功");
+                    } else alert("保存失败");
+                }
+            })
+        }
+
+        function save() {
+            var name = $("#name").val();
+            var age = $("#age").val();
+            var sex = $("#sex").val();
+            var role = $("#role").val();
+            if (name === "" || age === "" || role === "") {
+                alert("请填写完整信息");
+                return;
+            }
+            $.ajax({
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify({"name": name, "age": age, "sex": sex, "role_id": role}),
+                url: "/save_user",
+                method: "POST",
+                success: function (data) {
+                    if (data.code === 0) {
+                        alert("保存成功");
+                    } else alert("保存失败");
+                }
+            })
+        }
+    </script>
+</head>
+<body>
+<form onsubmit="/useradd" method="post">
+    <table>
+        <tr style="display:none;">
+            <td>
+                <label for="id">ID</label>
+                <input readonly type="text" id="id" name="id" value="{{ data.data.id }}">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="name">姓名</label>
+                <input type="text" id="name" name="name" value="{{ data.data.name }}">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="age">年龄</label>
+                <input type="text" id="age" name="age" value="{{ data.data.age }}">
+            </td>
+        </tr>
+        <tr>
+            <td><label for="sex">性别</label><select id="sex" name="sex">
+                <option value="0">未知</option>
+                <option value="1" selected>男</option>
+                <option value="2">女</option>
+            </select></td>
+        </tr>
+        <tr>
+            <td><label for="role">角色</label>
+                <select id="role" name="role"></select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="submit" value="保存" style="width: 80px;"/>
+                <input type="button" value="返回" style="width: 80px;" onclick="history.go(-1)"/>
+            </td>
+        </tr>
+    </table>
+
+</form>
+</body>
+</html>
